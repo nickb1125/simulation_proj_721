@@ -1,42 +1,51 @@
 # graphing functions
 
 graph_simulation_metric_bias <- function(sim) {
+  
+  ## Plot density for true and biased simualtions RR
   rr_graph <- ggplot(data = sim) + geom_histogram(aes(x = RR_estimate, y = ..density..), bins = 30) + 
-    geom_vline(aes(xintercept = mean(RR_true), color = 'True')) +
-    geom_vline(aes(xintercept = mean(RR_estimate), color = 'Simulation')) +
-    geom_density(aes(x = RR_non_bias_estimate, color = 'True')) + theme(legend.position="none")
+    geom_vline(aes(xintercept = mean(RR_true), color = 'True Simulation')) +
+    geom_vline(aes(xintercept = mean(RR_estimate), color = 'Biased Simulation')) +
+    geom_density(aes(x = RR_non_bias_estimate, color = 'True Simulation')) + theme(legend.position="none") + xlab('Relative Risk Estimate') + 
+    ylab('Density')
   
+  ## Plot density for true and biased simualtions RD
   rd_graph <- ggplot(data = sim) + geom_histogram(aes(x = RD_estimate, y = ..density..), bins = 30) + 
-    geom_vline(aes(xintercept = mean(RD_true), color = 'True')) +
-    geom_vline(aes(xintercept = mean(RD_estimate), color = 'Simulation'))+
-    geom_density(aes(x = RD_non_bias_estimate, color = 'True')) + theme(legend.position="none")
+    geom_vline(aes(xintercept = mean(RD_true), color = 'True Simulation')) +
+    geom_vline(aes(xintercept = mean(RD_estimate), color = 'Biased Simulation'))+
+    geom_density(aes(x = RD_non_bias_estimate, color = 'True Simulation')) + theme(legend.position="none") + xlab('Relative Difference Estimate') + 
+    ylab('Density')
   
+  ## Plot density for true and biased simulations OR
   or_graph <- ggplot(data = sim) + geom_histogram(aes(x = OR_estimate, y = ..density..), bins = 30) + 
-    geom_vline(aes(xintercept = mean(OR_true), color = 'True')) +
-    geom_vline(aes(xintercept = mean(OR_estimate), color = 'Simulation')) +
-    geom_density(aes(x = OR_non_bias_estimate, color = 'True')) 
+    geom_vline(aes(xintercept = mean(OR_true), color = 'True Simulation')) +
+    geom_vline(aes(xintercept = mean(OR_estimate), color = 'Biased Simulation')) +
+    geom_density(aes(x = OR_non_bias_estimate, color = 'True Simulation')) + xlab('Odds Ratio Estimate') + 
+    ylab('Density') +labs(colour="Simulation Type") +
+    theme(legend.key.size = unit(2, 'cm'))
   
+  # Get universal legend
   legend <- get_legend(or_graph)
+  or_graph <- or_graph + theme(legend.position="none") 
   
-  or_graph <- or_graph + theme(legend.position="none")
-  
-  ret <- rr_graph + rd_graph + or_graph + legend
+  # Arange all in 1 plot
+  ret <- ggarrange(rr_graph, rd_graph, or_graph, legend)
   
   return(ret)
 }
 
-simulation_info_table <- function(simulation_n, pct_exposed, risk_control, risk_treatment, FPR, FNR) {
-  attributes <- c('Number of Simulations', 'Prior Probability of Exposure', 
+simulation_info_table <- function(simulation_n, simulation_sample_size, pct_exposed, risk_control, risk_treatment, FPR, FNR) { # Function to get simulation settings table
+  attributes <- c('Number of Simulations', 'Single Simulation Sample Size', 'Prior Probability of Exposure', 
                   'True Exposure Risk', 'True Control Risk', 'False Positive Rate', 'True Positive Rate')
-  values <- as.character(c(simulation_n, pct_exposed, risk_control, risk_treatment, FPR, FNR))
+  values <- as.character(c(simulation_n, simulation_sample_size, pct_exposed, risk_control, risk_treatment, FPR, FNR))
   data.frame(Attributes = attributes, Values = values) %>% gt() %>%
     tab_header(
-      title = md("Simulation Settings"),
+      title = md("Simulation Settings")
     )
 }
 
 
-simulation_confusion_mat <- function(pct_exposed, risk_control, risk_treatment, FPR, FNR) {
+simulation_confusion_mat <- function(pct_exposed, risk_control, risk_treatment, FPR, FNR) { # Get expected confusionmatrix
   expected_exposed <- 500*(pct_exposed) 
   expected_control <- 500*(1 - pct_exposed)
   
@@ -60,7 +69,7 @@ simulation_confusion_mat <- function(pct_exposed, risk_control, risk_treatment, 
 }
 
 
-get_legend<-function(myggplot){
+get_legend<-function(myggplot){ # get legend from grobs object
   tmp <- ggplot_gtable(ggplot_build(myggplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]

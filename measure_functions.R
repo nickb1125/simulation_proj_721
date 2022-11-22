@@ -1,11 +1,11 @@
 # risk and risk measure functions
 
-estimate_risk <- function(sample) {
+estimate_risk <- function(sample) { # function for risk based on sample
   risk <- sum(sample) / length(sample)
   return(risk)
 }
 
-estimate_rr <- function(exposure, outcome) {
+estimate_rr <- function(exposure, outcome) { # estimated RR from sample
   sample <- data.frame(Exposure = exposure, Outcome = outcome)
   control_sample <- sample$Outcome[sample$Exposure == 0]
   trt_sample <- sample$Outcome[sample$Exposure == 1]
@@ -13,7 +13,7 @@ estimate_rr <- function(exposure, outcome) {
   return(rr)
 }
 
-estimate_rd <- function(exposure, outcome) {
+estimate_rd <- function(exposure, outcome) { # estimated RD from sample
   sample <- data.frame(Exposure = exposure, Outcome = outcome)
   control_sample <- sample$Outcome[sample$Exposure == 0]
   trt_sample <- sample$Outcome[sample$Exposure == 1]
@@ -21,7 +21,7 @@ estimate_rd <- function(exposure, outcome) {
   return(rd)
 }
 
-estimate_or <- function(exposure, outcome) {
+estimate_or <- function(exposure, outcome) { # estimated OR from sample
   sample <- data.frame(Exposure = exposure, Outcome = outcome)
   control_sample <- sample$Outcome[sample$Exposure == 0]
   trt_sample <- sample$Outcome[sample$Exposure == 1]
