@@ -2,6 +2,7 @@ library(dplyr)
 library(ggpubr)
 library(gt)
 library(ggplot2)
+library(scatterplot3d)
 
 ###################################################################### Project Plan ##################################################################################################
 
@@ -95,9 +96,12 @@ ui <- shinyUI(fluidPage(
     #outputs
     
     mainPanel(  
-      gt_output( 'settings' ),
-      gt_output( 'confusion' ),
-      plotOutput( 'histograms' )
+      tabsetPanel(
+        tabPanel("Tables", br(), gt_output( 'settings' ),
+                 gt_output( 'confusion' )),
+        tabPanel("Simulated", br(), plotOutput( 'histograms' )),
+        tabPanel("Expected Metric Bias Plots", br(), plotlyOutput("threeD_plots"))
+      ),
       
     )
   )
@@ -106,7 +110,9 @@ ui <- shinyUI(fluidPage(
 
 server <- function(input, output) {
   # Observe function to make all objects reactive
-  observe({
+  observe({ 
+    
+    list(input$pct_exposed, input$risk_control, input$risk_treatment, input$FPR, input$FNR)
     
     # Output settings table
     output$settings = render_gt({
@@ -134,11 +140,17 @@ server <- function(input, output) {
     
     
   })
+    
+    output$threeD_plots <- renderPlotly({
+      get_misclass_plots(input$pct_exposed, input$risk_control, input$risk_treatment)
+    })
   
 })
 }
 
 
+
+### Figure out deal with not updating for FNR
 
 
 
